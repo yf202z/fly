@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 日志级别从低到高分为TRACE < DEBUG < INFO < WARN < ERROR < FATAL，如果设置为WARN，则低于WARN的信息都不会输出 -->
+<!-- scan:当此属性设置为true时，配置文档如果发生改变，将会被重新加载，默认值为true --> 
+<!-- scanPeriod:设置监测配置文档是否有修改的时间间隔，如果没有给出时间单位，默认单位是毫秒。当scan为true时，此属性生效。默认的时间间隔为1分钟。 --> 
+<!-- debug:当此属性设置为true时，将打印出logback内部日志信息，实时查看logback运行状态。默认值为false。 -->
+<configuration>
+	<contextName>logback</contextName>
+	<property resource="application.properties"/>
+	<!--定义日志文件的存储地址 勿在 LogBack 的配置中使用相对路径-->
+    <property name="LOG_HOME" value="${log.home}/fly"/>
+
+	<!-- 控制台输出 -->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <!-- 日志输出编码 -->
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <!--格式化输出：%d表示日期，%thread表示线程名，%-5level：级别从左显示5个字符宽度，%msg：日志消息，%n是换行符-->
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{30} [%file:%line]-%msg%n</pattern>
+        </layout>
+    </appender>
+    
+    <!-- 按照每天生成日志文件 -->
+    <appender name="ALL_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    	<file>${LOG_HOME}/fly-all.log</file>
+    	<Append>true</Append>
+    	<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+    		<!-- 每天自动备份日志输出的文件名 -->
+    		<FileNamePattern>${LOG_HOME}/fly-all.log.%d{yyyy-MM-dd}.log</FileNamePattern>
+    		<MaxHistory>7</MaxHistory>
+    	</rollingPolicy>
+    	<layout class="ch.qos.logback.classic.PatternLayout">
+    		<!--格式化输出：%d表示日期，%thread表示线程名，%-5level：级别从左显示5个字符宽度，%msg：日志消息，%n是换行符-->
+    		<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{30} [%file:%line]-%msg%n</pattern>
+    	</layout>
+    </appender>
+    
+    <!-- 按照每天生成err文件 -->
+    <appender name="ERROR_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    	<file>${LOG_HOME}/fly-err.log</file>
+    	<Append>true</Append>
+    	<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+    		<FileNamePattern>${LOG_HOME}/fly-err.log.%d{yyyy-MM-dd}.log</FileNamePattern>
+    		<MaxHistory>7</MaxHistory>
+    	</rollingPolicy>
+    	<layout class="ch.qos.logback.classic.PatternLayout">
+    		<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{30} [%file:%line]-%msg%n
+            </pattern>
+    	</layout>
+    	<filter class="ch.qos.logback.classic.filter.LevelFilter">
+    		<!-- 级别过滤 -->
+    		<level>ERROR</level>
+    		<onMatch>ACCEPT</onMatch>
+    		<onMismatch>DENY</onMismatch>
+    	</filter>
+    </appender>
+    
+    <!-- 自定义跟踪日志 -->
+    <appender name="sysLog" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    	<file>${LOG_HOME}/fly-sysLog.log</file>
+    	<Append>true</Append>
+    	<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+    		<FileNamePattern>${LOG_HOME}/fly-sysLog.log.%d{yyyy-MM-dd}.log</FileNamePattern>
+    		<MaxHistory>7</MaxHistory>
+    	</rollingPolicy>
+    	<layout class="ch.qos.logback.classic.PatternLayout">
+    		<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{30} [%file:%line]-%msg%n</pattern>
+    	</layout>
+    </appender>
+    
+    <!-- 日志输出级别 -->
+   	<root level="${log.level}">
+   		<appender-ref ref="STDOUT" />
+   		<appender-ref ref="ALL_FILE" />
+   		<appender-ref ref="ERROR_FILE" />
+   	</root>
+   	
+	<logger name="sysLog" level="error" additivity="false">
+    	<appender-ref ref="sysLog" />
+    </logger>
+   
+</configuration>
